@@ -113,6 +113,7 @@
                 if (boardCopy[row][col] === 0) {
                     boardCopy[row][col] = this.currentPlayer;
                     placedRow = row;
+                    console.log(`Connect4: SimulateDrop Col ${col} -> Placed at Row ${row} (Index 0 is Bottom)`);
                     break;
                 }
             }
@@ -164,6 +165,7 @@
             for (let row = 0; row < this.rows; row++) {
                 if (this.board[row][col] === 0) {
                     this.board[row][col] = this.currentPlayer;
+                    console.log(`Connect4: DropPiece Col ${col} -> Placed at Row ${row} (Index 0 is Bottom)`);
 
                     if (this.checkWin()) {
                         this.winner = this.currentPlayer;
@@ -332,6 +334,8 @@
             for (let c = 0; c < 7; c++) {
                 const x = startX + (c * gapX);
                 const y = startY + (r * gapY); // Visual: Row 0 is Bottom
+
+                if (c === 0) console.log(`Connect4: Visual Setup Row ${r} -> Y=${y.toFixed(3)}`);
 
                 const piece = await createBanterObject(state.piecesRoot, BS.GeometryType.CylinderGeometry,
                     { radius: 0.04, height: 0.02 },
