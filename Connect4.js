@@ -434,8 +434,8 @@
         const color = hexToVector4(colorHex);
         color.w = opacity;
 
-        // Use transparent shader if opacity < 1.0
-        const shader = opacity < 1.0 ? "Transparent/Diffuse" : "Unlit/Diffuse";
+        // Use Unlit/DiffuseTransparent if opacity < 1.0 to avoid pink/missing shader issues
+        const shader = opacity < 1.0 ? "Unlit/DiffuseTransparent" : "Unlit/Diffuse";
         await obj.AddComponent(new BS.BanterMaterial(shader, "", color, BS.MaterialSide.Front, false));
 
         // Add Collider
