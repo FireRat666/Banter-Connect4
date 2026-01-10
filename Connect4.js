@@ -354,24 +354,31 @@
 
         // Create Clickable Columns
         // Center at Z=0.
-        // Make them THICK enough to catch clicks from both sides.
-        // Depth = 0.2 (extends -0.1 to +0.1).
+        // User requested semi-transparent columns with 30% opacity.
+        // Keeping Depth = 0.05 (5cm) as 0.2 was deemed potentially too thick/obstructive, 
+        // and user wants to see them now.
         const columnZ = 0;
-        const columnDepth = 0.2;
+        const columnDepth = 0.05;
 
         for (let c = 0; c < 7; c++) {
             const x = startX + (c * gapX);
-            const colObj = await new BS.GameObject(`Column_${c}`).Async();
-            await colObj.SetParent(state.root, false);
-            const ct = await colObj.AddComponent(new BS.Transform());
-            ct.localPosition = new BS.Vector3(x, startY + ((rows - 1) * gapY) / 2, columnZ);
+            const pos = new BS.Vector3(x, startY + ((rows - 1) * gapY) / 2, columnZ);
 
             // Reduce width to 0.07 (gap 0.1 - bar 0.02 = 0.08 space). 
             // 0.07 leaves 0.005 margin.
             const colWidth = gapX * 0.7; // 0.07
-            // Ensure height covers whole column
-            await colObj.AddComponent(new BS.BoxCollider(true, new BS.Vector3(0, 0, 0), new BS.Vector3(colWidth, gridHeight, columnDepth)));
-            await colObj.SetLayer(5);
+
+            // Create visible column with 30% opacity
+            const colObj = await createBanterObject(state.root, BS.GeometryType.BoxGeometry,
+                { width: colWidth, height: gridHeight, depth: columnDepth },
+                '#FFFFFF',
+                pos,
+                true, // hasCollider
+                0.3   // opacity
+            );
+
+            // Name it properly for debugging
+            colObj.name = `Column_${c}`;
 
             colObj.On('click', () => {
                 console.log(`Connect4: Column ${c} clicked`);
@@ -384,7 +391,8 @@
             const resetBtn = await createBanterObject(state.root, BS.GeometryType.BoxGeometry,
                 { width: 0.2, height: 0.1, depth: 0.05 },
                 '#333333',
-                config.resetPosition
+                config.resetPosition,
+                true // Has Collider
             );
 
             let rt = resetBtn.GetComponent(BS.ComponentType.Transform);
@@ -415,7 +423,7 @@
         ];
     }
 
-    async function createBanterObject(parent, type, dims, colorHex, pos) {
+    async function createBanterObject(parent, type, dims, colorHex, pos, hasCollider = false, opacity = 1.0) {
         const obj = await new BS.GameObject("Geo").Async();
         await obj.SetParent(parent, false);
 
@@ -426,20 +434,26 @@
         await obj.AddComponent(new BS.BanterGeometry(...fullArgs));
 
         const color = hexToVector4(colorHex);
-        await obj.AddComponent(new BS.BanterMaterial("Unlit/Diffuse", "", color, BS.MaterialSide.Front, false));
+        color.w = opacity;
+
+        // Use transparent shader if opacity < 1.0
+        const shader = opacity < 1.0 ? "Transparent/Diffuse" : "Unlit/Diffuse";
+        await obj.AddComponent(new BS.BanterMaterial(shader, "", color, BS.MaterialSide.Front, false));
 
         // Add Collider
-        let colSize;
-        if (type === BS.GeometryType.BoxGeometry) {
-            colSize = new BS.Vector3(dims.width || 1, dims.height || 1, dims.depth || 1);
-        } else {
-            // Cylinder/Sphere approximation
-            const r = dims.radius || 0.5;
-            const h = dims.height || 1;
-            colSize = new BS.Vector3(r * 2, h, r * 2);
+        if (hasCollider) {
+            let colSize;
+            if (type === BS.GeometryType.BoxGeometry) {
+                colSize = new BS.Vector3(dims.width || 1, dims.height || 1, dims.depth || 1);
+            } else {
+                // Cylinder/Sphere approximation
+                const r = dims.radius || 0.5;
+                const h = dims.height || 1;
+                colSize = new BS.Vector3(r * 2, h, r * 2);
+            }
+            await obj.AddComponent(new BS.BoxCollider(true, new BS.Vector3(0, 0, 0), colSize));
+            await obj.SetLayer(5);
         }
-        await obj.AddComponent(new BS.BoxCollider(true, new BS.Vector3(0, 0, 0), colSize));
-        await obj.SetLayer(5);
 
         return obj;
     }
