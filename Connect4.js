@@ -366,14 +366,16 @@
             // 0.07 leaves 0.005 margin.
             const colWidth = gapX * 0.7; // 0.07
 
-            // Create visible column with 30% opacity
-            const colObj = await createBanterObject(state.root, BS.GeometryType.BoxGeometry,
-                { width: colWidth, height: gridHeight, depth: columnDepth },
-                '#FFFFFF',
-                pos,
-                true, // hasCollider
-                0.3   // opacity
-            );
+            // Revert to invisible columns
+            const colObj = await new BS.GameObject(`Column_${c}`).Async();
+            await colObj.SetParent(state.root, false);
+
+            const ct = await colObj.AddComponent(new BS.Transform());
+            ct.localPosition = pos;
+
+            // Ensure height covers whole column
+            await colObj.AddComponent(new BS.BoxCollider(true, new BS.Vector3(0, 0, 0), new BS.Vector3(colWidth, gridHeight, columnDepth)));
+            await colObj.SetLayer(5);
 
             // Name it properly for debugging
             colObj.name = `Column_${c}`;
