@@ -95,7 +95,8 @@
             return {
                 board: this.board,
                 currentPlayer: this.currentPlayer,
-                winner: this.winner
+                winner: this.winner,
+                lastModified: this.lastModified
             };
         }
 
@@ -152,8 +153,9 @@
 
             return {
                 board: boardCopy,
-                currentPlayer: nextGameOver ? this.currentPlayer : nextPlayer, // If game over, keep current player as "winner"
-                winner: nextWinner
+                currentPlayer: nextGameOver ? this.currentPlayer : nextPlayer,
+                winner: nextWinner,
+                lastModified: Date.now()
             };
         }
 
@@ -444,11 +446,15 @@
 
     function handleColumnClick(col) {
         if (state.game.winner) return;
-        if (state.isSyncing) return; // Lock input
+        if (state.isSyncing) {
+            console.log("Connect4: Input Locked (Syncing or Spam Protection)");
+            return;
+        }
 
         // Simulate drop without mutating local state
         const nextState = state.game.simulateDrop(col);
         if (nextState) {
+            console.log("Connect4: Locking Input & Sending Move...");
             state.isSyncing = true; // Engage Lock
             syncState(nextState);
         }
@@ -522,6 +528,7 @@
 
                 if (val) {
                     try {
+                        console.log("Connect4: Received State Change -> Loading & Unlocking");
                         const data = JSON.parse(val);
                         state.game.loadState(data);
                         updateVisuals();
