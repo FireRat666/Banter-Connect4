@@ -339,14 +339,14 @@
 
                 if (c === 0) console.log(`Connect4: Visual Setup Row ${r} -> Y=${y.toFixed(3)}`);
 
-                const piece = await createBanterObject(state.piecesRoot, BS.GeometryType.CylinderGeometry,
-                    { radius: 0.04, height: 0.02 },
+                const piece = await createBanterObject(state.piecesRoot, BS.GeometryType.SphereGeometry,
+                    { radius: 0.045 },
                     COLORS.empty,
                     new BS.Vector3(x, y, piecesZ)
                 );
 
                 const pt = piece.GetComponent(BS.ComponentType.Transform);
-                pt.localEulerAngles = new BS.Vector3(90, 0, 0);
+                pt.localScale = new BS.Vector3(1, 0.25, 1); 
                 piece.SetActive(false);
 
                 state.slots[r][c] = piece;
@@ -416,12 +416,46 @@
     }
 
     function getGeoArgs(type, dims) {
-        return [
-            type, null, dims.width || 1, dims.height || 1, dims.depth || 1, 1, 1, 1,
-            dims.radius || 0.5, 24, 0, 6.283185, 0, 6.283185, 8, false,
-            dims.radius || 0.5, dims.radius || 0.5,
-            0, 1, 24, 8, 0.4, 16, 6.283185, 2, 3, 5, 5, 0, ""
-        ];
+        // Defaults: width=1, height=1, depth=1, segments=24, radius=0.5
+        const w = dims.width || 1;
+        const h = dims.height || 1;
+        const d = dims.depth || 1;
+        const r = dims.radius || 0.5;
+        const PI2 = 6.283185;
+
+        // We only need to pass arguments up to what is required for the specific geometry.
+        if (type === BS.GeometryType.BoxGeometry) {
+            return [type, null, w, h, d];
+        } else if (type === BS.GeometryType.SphereGeometry) {
+            // Sphere specific args for smoothness
+            return [
+                type, null, w, h, d,
+                24, 16, 1, // widthSeg, heightSeg, depthSeg
+                r, 24, // radius, segments
+                0, PI2, 0, PI2,
+                8, false,
+                r, r
+            ];
+        } else if (type === BS.GeometryType.CylinderGeometry) {
+             // Cylinder needs radiusTop/Bottom (args 16, 17) and height (arg 3)
+             return [
+                type, null, 
+                1, h, 1, // Use dims.height for the height parameter
+                1, 1, 1,
+                r, 24, // Use dims.radius and a default segment count
+                0, PI2, 0, PI2,
+                8, false,
+                r, r // radiusTop, radiusBottom
+            ];
+        } else {
+            // Fallback for other geometry types
+            return [
+                type, null, w, h, d, 1, 1, 1,
+                r, 24, 0, PI2, 0, PI2, 8, false,
+                r, r,
+                0, 1, 24, 8, 0.4, 16, PI2, 2, 3, 5, 5, 0, ""
+            ];
+        }
     }
 
     async function createBanterObject(parent, type, dims, colorHex, pos, hasCollider = false, opacity = 1.0) {
