@@ -346,7 +346,7 @@
                 );
 
                 const pt = piece.GetComponent(BS.ComponentType.Transform);
-                pt.localScale = new BS.Vector3(1, 0.25, 1); 
+                pt.localScale = new BS.Vector3(1, 1, 0.25); 
                 piece.SetActive(false);
 
                 state.slots[r][c] = piece;
