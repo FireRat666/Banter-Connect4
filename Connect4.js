@@ -347,6 +347,7 @@
 
                 const pt = piece.GetComponent(BS.ComponentType.Transform);
                 pt.localEulerAngles = new BS.Vector3(90, 0, 0);
+                piece.SetActive(false);
 
                 state.slots[r][c] = piece;
             }
@@ -489,19 +490,24 @@
                 const cell = state.game.board[r][c];
                 const pieceObj = state.slots[r][c];
 
-                let color = COLORS.empty;
-                if (cell === 1) color = COLORS.red;
-                if (cell === 2) color = COLORS.yellow;
+                if (cell === 0) {
+                    pieceObj.SetActive(false);
+                } else {
+                    pieceObj.SetActive(true);
+                    let color = COLORS.empty;
+                    if (cell === 1) color = COLORS.red;
+                    if (cell === 2) color = COLORS.yellow;
 
-                // Highlight winning cells
-                if (state.game.winningCells.some(([wr, wc]) => wr === r && wc === c)) {
-                    // Flash or change color? Let's just make them Greenish or bright
-                    color = COLORS.winHighlight;
+                    // Highlight winning cells
+                    if (state.game.winningCells.some(([wr, wc]) => wr === r && wc === c)) {
+                        // Flash or change color? Let's just make them Greenish or bright
+                        color = COLORS.winHighlight;
+                    }
+
+                    // Update material color
+                    const mat = pieceObj.GetComponent(BS.ComponentType.BanterMaterial);
+                    if (mat) mat.color = hexToVector4(color);
                 }
-
-                // Update material color
-                const mat = pieceObj.GetComponent(BS.ComponentType.BanterMaterial);
-                if (mat) mat.color = hexToVector4(color);
             }
         }
     }
