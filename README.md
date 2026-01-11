@@ -14,7 +14,7 @@ A fully synced, multiplayer Connect 4 game that can be effortlessly embedded int
 Add the following script tag to your space's `index.html` (or wherever you inject Banter scripts):
 
 ```html
-<script src="https://your-domain.com/path/to/Connect4.js?instance=game1&boardPosition=0 1.5 5"></script>
+<script src="https://banter-connect4.firer.at/Connect4.js?instance=game1&boardPosition=0 1.5 5"></script>
 ```
 
 *Replace the `src` URL with the actual path to where you are hosting `Connect4.js`.*
@@ -37,7 +37,7 @@ You can configure the game instance using query parameters in the script `src`:
 ### Example with all parameters
 
 ```html
-<script src="./Connect4.js?instance=lounge_c4&boardPosition=10 0.5 -3&boardRotation=0 90 0&boardScale=1.5 1.5 1.5"></script>
+<script src="https://banter-connect4.firer.at/Connect4.js?instance=lounge_c4&boardPosition=10 0.5 -3&boardRotation=0 90 0&boardScale=1.5 1.5 1.5"></script>
 ```
 
 ## Game Rules
