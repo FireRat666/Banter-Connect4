@@ -237,7 +237,8 @@
 
     const PIECE_MODELS = {
         1: 'DiscRed.glb', // Player 1
-        2: 'DiscBlue.glb' // Player 2
+        2: 'DiscBlue.glb', // Player 2
+        'highlight': 'DiscGreen.glb'
     };
     
     function getModelUrl(modelName) {
@@ -353,19 +354,24 @@
                 // 2. Create the custom model pieces (if enabled)
                 let redPiece = null;
                 let bluePiece = null;
+                let greenPiece = null;
                 if (config.useCustomModels) {
                     redPiece = await createCustomPiece(state.piecesRoot, 1, pos);
                     if(redPiece) redPiece.SetActive(false);
 
                     bluePiece = await createCustomPiece(state.piecesRoot, 2, pos);
                     if(bluePiece) bluePiece.SetActive(false);
+
+                    greenPiece = await createCustomPiece(state.piecesRoot, 'highlight', pos);
+                    if(greenPiece) greenPiece.SetActive(false);
                 }
 
                 // Store all piece versions for this slot
                 state.slots[r][c] = {
                     sphere: spherePiece,
                     redModel: redPiece,
-                    blueModel: bluePiece
+                    blueModel: bluePiece,
+                    greenModel: greenPiece
                 };
             }
         }
@@ -508,7 +514,7 @@
         if (pos) t.localPosition = pos;
         
         // Scale down and rotate pieces to be vertical
-        t.localScale = new BS.Vector3(0.05, 0.05, 0.05);
+        t.localScale = new BS.Vector3(0.045, 0.045, 0.045);
         t.localEulerAngles = new BS.Vector3(90, 0, 0);
 
         const url = getModelUrl(modelName);
@@ -560,44 +566,35 @@
             for (let c = 0; c < 7; c++) {
                 const cell = state.game.board[r][c];
                 const slot = state.slots[r][c];
+                const isWinCell = state.game.winningCells.some(([wr, wc]) => wr === r && wc === c);
 
                 // Deactivate all pieces first
                 slot.sphere.SetActive(false);
                 if (slot.redModel) slot.redModel.SetActive(false);
                 if (slot.blueModel) slot.blueModel.SetActive(false);
+                if (slot.greenModel) slot.greenModel.SetActive(false);
 
                 if (cell === 0) {
-                    // Slot is empty, we're done here.
-                    continue;
+                    continue; // Slot is empty
                 }
 
-                let activePiece = null;
-                let pieceColor = COLORS.empty;
-
-                if (config.useCustomModels) {
-                    if (cell === 1) {
-                        activePiece = slot.redModel;
-                        pieceColor = COLORS.red;
-                    } else if (cell === 2) {
-                        activePiece = slot.blueModel;
-                        pieceColor = COLORS.blue;
+                if (isWinCell && config.useCustomModels) {
+                    // Priority 1: Show green highlight model if winning
+                    if (slot.greenModel) {
+                        slot.greenModel.SetActive(true);
                     }
+                } else if (config.useCustomModels) {
+                    // Priority 2: Show player's custom model
+                    if (cell === 1 && slot.redModel) slot.redModel.SetActive(true);
+                    if (cell === 2 && slot.blueModel) slot.blueModel.SetActive(true);
                 } else {
-                    activePiece = slot.sphere;
-                    if (cell === 1) pieceColor = COLORS.red;
-                    if (cell === 2) pieceColor = COLORS.blue;
-                }
-
-                if (activePiece) {
-                    activePiece.SetActive(true);
-
-                    // Check for win highlight
-                    if (state.game.winningCells.some(([wr, wc]) => wr === r && wc === c)) {
+                    // Fallback: Show sphere and color it
+                    slot.sphere.SetActive(true);
+                    let pieceColor = (cell === 1) ? COLORS.red : COLORS.blue;
+                    if (isWinCell) {
                         pieceColor = COLORS.winHighlight;
                     }
-
-                    // Update material color
-                    const mat = activePiece.GetComponent(BS.ComponentType.BanterMaterial);
+                    const mat = slot.sphere.GetComponent(BS.ComponentType.BanterMaterial);
                     if (mat) mat.color = hexToVector4(pieceColor);
                 }
             }
