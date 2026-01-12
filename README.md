@@ -33,6 +33,7 @@ You can configure the game instance using query parameters in the script `src`:
 | `resetRotation` | Rotation of the reset button relative to the board. | `0 0 0` | `?resetRotation=180 0 0` |
 | `resetScale` | Scale of the reset button. | `1 1 1` | `?resetScale=0.5 0.5 0.5` |
 | `hideUI` | If `true`, hides the restart/reset button. | `false` | `?hideUI=true` |
+| `HideBoard` | If `true`, hides the game board frame. | `false` | `?HideBoard=true` |
 
 ### Example with all parameters
 

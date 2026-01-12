@@ -13,7 +13,8 @@
         resetRotation: new BS.Vector3(0, 0, 0),
         resetScale: new BS.Vector3(1, 1, 1),
         instance: window.location.href.split('?')[0],
-        hideUI: false
+        hideUI: false,
+        hideBoard: false
     };
 
     const COLORS = {
@@ -47,6 +48,7 @@
         const params = new URLSearchParams(url.search);
 
         if (params.has('hideUI')) config.hideUI = params.get('hideUI') === 'true';
+        if (params.has('HideBoard')) config.hideBoard = params.get('HideBoard') === 'true';
         if (params.has('instance')) config.instance = params.get('instance');
 
         config.boardScale = parseVector3(params.get('boardScale'), config.boardScale);
@@ -261,69 +263,71 @@
         t.localEulerAngles = config.boardRotation;
         t.localScale = config.boardScale;
 
-        // --- Construct Double-Sided Grid Frame ---
-        // Instead of a solid backing, we build a rack from bars so pieces are visible from both sides.
-        const rows = 6;
-        const cols = 7;
-        const startX = -0.3;
-        const startY = 0.1;
-        const gapX = 0.1;
-        const gapY = 0.1;
+        if (!config.hideBoard) {
+            // --- Construct Double-Sided Grid Frame ---
+            // Instead of a solid backing, we build a rack from bars so pieces are visible from both sides.
+            const rows = 6;
+            const cols = 7;
+            const startX = -0.3;
+            const startY = 0.1;
+            const gapX = 0.1;
+            const gapY = 0.1;
 
-        // Rack Color can be same Blue
-        // Frame Dimensions
-        // We need 8 Vertical Bars (between cols)
-        // We need 7 Horizontal bars (between rows+top/bottom)
+            // Rack Color can be same Blue
+            // Frame Dimensions
+            // We need 8 Vertical Bars (between cols)
+            // We need 7 Horizontal bars (between rows+top/bottom)
 
-        // Z-Positioning: 
-        // Pieces at 0.
-        // Frame at 0.
-        // Frame Depth > Piece Depth.
-        // Piece Depth (cylinder height) = 0.02.
-        // Frame Depth = 0.03.
+            // Z-Positioning: 
+            // Pieces at 0.
+            // Frame at 0.
+            // Frame Depth > Piece Depth.
+            // Piece Depth (cylinder height) = 0.02.
+            // Frame Depth = 0.03.
 
-        const frameDepth = 0.03;
-        const barWidth = 0.02; // Thickness of the bars
+            const frameDepth = 0.03;
+            const barWidth = 0.02; // Thickness of the bars
 
-        // 1. Vertical Bars (8 total: Left of col 0, Right of col 0/Left of col 1... Right of col 6)
-        // Columns are at startX + c*gapX.
-        // Bars should be at (startX - gapX/2) + k*gapX ??
-        // Col 0 center: -0.3. Width 0.1. Left Edge: -0.35. Right Edge: -0.25.
-        // Let's place bars at x = -0.35, -0.25, -0.15 ...
+            // 1. Vertical Bars (8 total: Left of col 0, Right of col 0/Left of col 1... Right of col 6)
+            // Columns are at startX + c*gapX.
+            // Bars should be at (startX - gapX/2) + k*gapX ??
+            // Col 0 center: -0.3. Width 0.1. Left Edge: -0.35. Right Edge: -0.25.
+            // Let's place bars at x = -0.35, -0.25, -0.15 ...
 
-        const frameRoot = await new BS.GameObject("Frame_Root").Async();
-        await frameRoot.SetParent(state.root, false);
-        await frameRoot.AddComponent(new BS.Transform());
+            const frameRoot = await new BS.GameObject("Frame_Root").Async();
+            await frameRoot.SetParent(state.root, false);
+            await frameRoot.AddComponent(new BS.Transform());
 
-        const gridHeight = (rows * gapY) + barWidth; // approximate
+            const gridHeight = (rows * gapY) + barWidth; // approximate
 
-        for (let i = 0; i <= cols; i++) {
-            const barX = (startX - (gapX / 2)) + (i * gapX);
-            // Center Y: Rows range from 0.1 to 0.6. Center ~0.35.
-            const centerY = startY + ((rows - 1) * gapY) / 2;
+            for (let i = 0; i <= cols; i++) {
+                const barX = (startX - (gapX / 2)) + (i * gapX);
+                // Center Y: Rows range from 0.1 to 0.6. Center ~0.35.
+                const centerY = startY + ((rows - 1) * gapY) / 2;
 
-            const vBar = await createBanterObject(frameRoot, BS.GeometryType.BoxGeometry,
-                { width: barWidth, height: gridHeight, depth: frameDepth },
-                COLORS.board,
-                new BS.Vector3(barX, centerY, 0)
-            );
-        }
+                const vBar = await createBanterObject(frameRoot, BS.GeometryType.BoxGeometry,
+                    { width: barWidth, height: gridHeight, depth: frameDepth },
+                    COLORS.board,
+                    new BS.Vector3(barX, centerY, 0)
+                );
+            }
 
-        // 2. Horizontal Bars (top and bottom minimum, maybe between rows if we want full grid look)
-        // Full grid looks better and is not expensive (7 bars).
-        // Rows at y = 0.1, 0.2 ...
-        // Bars at y = 0.05, 0.15 ...
-        const gridWidth = (cols * gapX) + barWidth;
-        const centerX = startX + ((cols - 1) * gapX) / 2;
+            // 2. Horizontal Bars (top and bottom minimum, maybe between rows if we want full grid look)
+            // Full grid looks better and is not expensive (7 bars).
+            // Rows at y = 0.1, 0.2 ...
+            // Bars at y = 0.05, 0.15 ...
+            const gridWidth = (cols * gapX) + barWidth;
+            const centerX = startX + ((cols - 1) * gapX) / 2;
 
-        for (let i = 0; i <= rows; i++) {
-            const barY = (startY - (gapY / 2)) + (i * gapY);
+            for (let i = 0; i <= rows; i++) {
+                const barY = (startY - (gapY / 2)) + (i * gapY);
 
-            const hBar = await createBanterObject(frameRoot, BS.GeometryType.BoxGeometry,
-                { width: gridWidth, height: barWidth, depth: frameDepth },
-                COLORS.board,
-                new BS.Vector3(centerX, barY, 0)
-            );
+                const hBar = await createBanterObject(frameRoot, BS.GeometryType.BoxGeometry,
+                    { width: gridWidth, height: barWidth, depth: frameDepth },
+                    COLORS.board,
+                    new BS.Vector3(centerX, barY, 0)
+                );
+            }
         }
 
         // Create Slots Matrix
