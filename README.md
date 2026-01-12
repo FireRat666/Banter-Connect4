@@ -34,16 +34,19 @@ You can configure the game instance using query parameters in the script `src`:
 | `resetScale` | Scale of the reset button. | `1 1 1` | `?resetScale=0.5 0.5 0.5` |
 | `hideUI` | If `true`, hides the restart/reset button. | `false` | `?hideUI=true` |
 | `HideBoard` | If `true`, hides the game board frame. | `false` | `?HideBoard=true` |
+| `useCustomModels` | If `true`, uses custom GLB models for the pieces instead of the default spheres. Requires `Models/DiscRed.glb` and `Models/DiscBlue.glb` to be present. | `false` | `?useCustomModels=true` |
+| `lighting` | If `lit` and using custom models, applies a `Standard` material to the pieces so they react to scene lights. | `unlit` | `?lighting=lit` |
+| `addLights` | If `true` and using lit custom models, adds a default directional light to the scene. | `true` | `?addLights=false` |
 
 ### Example with all parameters
 
 ```html
-<script src="https://banter-connect4.firer.at/Connect4.js?instance=lounge_c4&boardPosition=10 0.5 -3&boardRotation=0 90 0&boardScale=1.5 1.5 1.5"></script>
+<script src="https://banter-connect4.firer.at/Connect4.js?instance=lounge_c4&boardPosition=10 0.5 -3&boardRotation=0 90 0&boardScale=1.5 1.5 1.5&useCustomModels=true&lighting=lit"></script>
 ```
 
 ## Game Rules
 
-1.  **Objective**: Connect 4 pieces of your color (Red or Yellow) vertically, horizontally, or diagonally.
+1.  **Objective**: Connect 4 pieces of your color (Red or Blue) vertically, horizontally, or diagonally.
 2.  **Gameplay**:
     *   Click on any column to drop your piece into the lowest available slot.
     *   Turn passes to the other player automatically.
