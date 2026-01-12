@@ -507,8 +507,9 @@
         let t = await piece.AddComponent(new BS.Transform());
         if (pos) t.localPosition = pos;
         
-        // Scale the piece to match the size of the sphere pieces
-        t.localScale = new BS.Vector3(0.09, 0.09, 0.09);
+        // Scale down and rotate pieces to be vertical
+        t.localScale = new BS.Vector3(0.05, 0.05, 0.05);
+        t.localEulerAngles = new BS.Vector3(90, 0, 0);
 
         const url = getModelUrl(modelName);
         console.log(`Loading GLB from: ${url}`);
@@ -516,11 +517,13 @@
         try {
             await piece.AddComponent(new BS.BanterGLTF(url, false, false, false, false, false, false));
 
-            if (config.lighting === 'lit') {
-                const colorHex = player === 1 ? COLORS.red : COLORS.blue;
-                const colorVec4 = hexToVector4(colorHex);
-                await piece.AddComponent(new BS.BanterMaterial("Standard", "", colorVec4, BS.MaterialSide.Front, false));
-            }
+            // Always add a material so we can change the color later for win highlights
+            const colorHex = player === 1 ? COLORS.red : COLORS.blue;
+            const colorVec4 = hexToVector4(colorHex);
+            const shader = config.lighting === 'lit' ? "Standard" : "Unlit/Diffuse";
+            
+            await piece.AddComponent(new BS.BanterMaterial(shader, "", colorVec4, BS.MaterialSide.Front, false));
+
         } catch (glbErr) {
             console.error(`Failed to load GLTF for player ${player}:`, glbErr);
         }
