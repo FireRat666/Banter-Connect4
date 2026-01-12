@@ -46,7 +46,7 @@ You can configure the game instance using query parameters in the script `src`:
 
 ## Game Rules
 
-1.  **Objective**: Connect 4 pieces of your color (Red or Blue) vertically, horizontally, or diagonally.
+1.  **Objective**: Connect 4 pieces of your color (Red or Yellow) vertically, horizontally, or diagonally.
 2.  **Gameplay**:
     *   Click on any column to drop your piece into the lowest available slot.
     *   Turn passes to the other player automatically.

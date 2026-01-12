@@ -23,7 +23,7 @@
     const COLORS = {
         board: '#0055AA',    // Classic Blue Board
         red: '#D50000',      // Red Piece
-        blue: '#0052D5',   // blue Piece
+        yellow: '#ffff00ff',   // yellow Piece
         empty: '#FFFFFF',    // Empty slot (transparent-ish visual)
         winHighlight: '#00FF00', // Green highlight for winning pieces
         hover: '#4488FF'     // Column hover effect
@@ -72,7 +72,7 @@
             this.rows = 6;
             this.cols = 7;
             this.board = this.createEmptyBoard();
-            this.currentPlayer = 1; // 1 = Red, 2 = Blue
+            this.currentPlayer = 1; // 1 = Red, 2 = Yellow
             this.winner = null;
             this.winningCells = [];
             this.gameOver = false;
@@ -237,7 +237,7 @@
 
     const PIECE_MODELS = {
         1: 'DiscRed.glb', // Player 1
-        2: 'DiscBlue.glb', // Player 2
+        2: 'DiscYellow.glb', // Player 2
         'highlight': 'DiscGreen.glb'
     };
     
@@ -353,14 +353,14 @@
                 
                 // 2. Create the custom model pieces (if enabled)
                 let redPiece = null;
-                let bluePiece = null;
+                let yellowPiece = null;
                 let greenPiece = null;
                 if (config.useCustomModels) {
                     redPiece = await createCustomPiece(state.piecesRoot, 1, pos);
                     if(redPiece) redPiece.SetActive(false);
 
-                    bluePiece = await createCustomPiece(state.piecesRoot, 2, pos);
-                    if(bluePiece) bluePiece.SetActive(false);
+                    yellowPiece = await createCustomPiece(state.piecesRoot, 2, pos);
+                    if(yellowPiece) yellowPiece.SetActive(false);
 
                     greenPiece = await createCustomPiece(state.piecesRoot, 'highlight', pos);
                     if(greenPiece) greenPiece.SetActive(false);
@@ -370,7 +370,7 @@
                 state.slots[r][c] = {
                     sphere: spherePiece,
                     redModel: redPiece,
-                    blueModel: bluePiece,
+                    yellowModel: yellowPiece,
                     greenModel: greenPiece
                 };
             }
@@ -524,7 +524,7 @@
             await piece.AddComponent(new BS.BanterGLTF(url, false, false, false, false, false, false));
 
             // Always add a material so we can change the color later for win highlights
-            const colorHex = player === 1 ? COLORS.red : COLORS.blue;
+            const colorHex = player === 1 ? COLORS.red : COLORS.yellow;
             const colorVec4 = hexToVector4(colorHex);
             const shader = config.lighting === 'lit' ? "Standard" : "Unlit/Diffuse";
             
@@ -571,7 +571,7 @@
                 // Deactivate all pieces first
                 slot.sphere.SetActive(false);
                 if (slot.redModel) slot.redModel.SetActive(false);
-                if (slot.blueModel) slot.blueModel.SetActive(false);
+                if (slot.yellowModel) slot.yellowModel.SetActive(false);
                 if (slot.greenModel) slot.greenModel.SetActive(false);
 
                 if (cell === 0) {
@@ -586,11 +586,11 @@
                 } else if (config.useCustomModels) {
                     // Priority 2: Show player's custom model
                     if (cell === 1 && slot.redModel) slot.redModel.SetActive(true);
-                    if (cell === 2 && slot.blueModel) slot.blueModel.SetActive(true);
+                    if (cell === 2 && slot.yellowModel) slot.yellowModel.SetActive(true);
                 } else {
                     // Fallback: Show sphere and color it
                     slot.sphere.SetActive(true);
-                    let pieceColor = (cell === 1) ? COLORS.red : COLORS.blue;
+                    let pieceColor = (cell === 1) ? COLORS.red : COLORS.yellow;
                     if (isWinCell) {
                         pieceColor = COLORS.winHighlight;
                     }
