@@ -33,6 +33,10 @@
             const parts = s.split(' ').map(Number);
             if (parts.length >= 3) return new BS.Vector3(parts[0], parts[1], parts[2]);
         }
+        const num = parseFloat(s);
+        if (!isNaN(num)) {
+            return new BS.Vector3(num, num, num);
+        }
         return defaultVal;
     };
 
