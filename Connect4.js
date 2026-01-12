@@ -285,23 +285,6 @@
         t.localEulerAngles = config.boardRotation;
         t.localScale = config.boardScale;
 
-        const scene = BS.BanterScene.GetInstance();
-
-        // --- Create Model Templates ---
-        let modelTemplates = { red: null, blue: null, green: null };
-        if (config.useCustomModels) {
-            console.log("Connect4: Creating custom model templates...");
-            // Create templates off-screen and inactive
-            const templateRoot = await new BS.GameObject("ModelTemplates").Async();
-            await templateRoot.SetParent(state.root, false);
-            templateRoot.SetActive(false); // Keep the whole template group inactive
-
-            modelTemplates.red = await createCustomPiece(templateRoot, 1, new BS.Vector3(0,0,0));
-            modelTemplates.blue = await createCustomPiece(templateRoot, 2, new BS.Vector3(0,0,0));
-            modelTemplates.green = await createCustomPiece(templateRoot, 'highlight', new BS.Vector3(0,0,0));
-            console.log("Connect4: Templates created.");
-        }
-
         // Add a light if we are using lit models
         if (config.useCustomModels && config.lighting === 'lit' && config.addLights) {
             const lightGO = await new BS.GameObject("Connect4_DirectionalLight");
@@ -368,32 +351,19 @@
                 pt.localScale = new BS.Vector3(1, 1, 0.25);
                 spherePiece.SetActive(false);
                 
-                // 2. Instantiate custom model pieces from templates
+                // 2. Create the custom model pieces (if enabled)
                 let redPiece = null;
                 let bluePiece = null;
                 let greenPiece = null;
                 if (config.useCustomModels) {
-                    if (modelTemplates.red) {
-                        redPiece = await scene.Instantiate(modelTemplates.red);
-                        await redPiece.SetParent(state.piecesRoot, false);
-                        const t = redPiece.GetComponent(BS.ComponentType.Transform);
-                        t.localPosition = pos;
-                        redPiece.SetActive(false);
-                    }
-                    if (modelTemplates.blue) {
-                        bluePiece = await scene.Instantiate(modelTemplates.blue);
-                        await bluePiece.SetParent(state.piecesRoot, false);
-                        const t = bluePiece.GetComponent(BS.ComponentType.Transform);
-                        t.localPosition = pos;
-                        bluePiece.SetActive(false);
-                    }
-                    if (modelTemplates.green) {
-                        greenPiece = await scene.Instantiate(modelTemplates.green);
-                        await greenPiece.SetParent(state.piecesRoot, false);
-                        const t = greenPiece.GetComponent(BS.ComponentType.Transform);
-                        t.localPosition = pos;
-                        greenPiece.SetActive(false);
-                    }
+                    redPiece = await createCustomPiece(state.piecesRoot, 1, pos);
+                    if(redPiece) redPiece.SetActive(false);
+
+                    bluePiece = await createCustomPiece(state.piecesRoot, 2, pos);
+                    if(bluePiece) bluePiece.SetActive(false);
+
+                    greenPiece = await createCustomPiece(state.piecesRoot, 'highlight', pos);
+                    if(greenPiece) greenPiece.SetActive(false);
                 }
 
                 // Store all piece versions for this slot
