@@ -51,7 +51,7 @@
         const params = new URLSearchParams(url.search);
 
         if (params.has('hideUI')) config.hideUI = params.get('hideUI') === 'true';
-        if (params.has('HideBoard')) config.hideBoard = params.get('HideBoard') === 'true';
+        if (params.has('hideBoard')) config.hideBoard = params.get('hideBoard') === 'true';
         if (params.has('instance')) config.instance = params.get('instance');
         if (params.has('useCustomModels')) config.useCustomModels = params.get('useCustomModels') === 'true';
         if (params.has('lighting')) config.lighting = params.get('lighting');
