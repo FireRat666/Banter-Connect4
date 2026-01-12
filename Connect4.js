@@ -263,15 +263,19 @@
         t.localEulerAngles = config.boardRotation;
         t.localScale = config.boardScale;
 
+        // --- Grid Constants ---
+        const rows = 6;
+        const cols = 7;
+        const startX = -0.3;
+        const startY = 0.1;
+        const gapX = 0.1;
+        const gapY = 0.1;
+        const barWidth = 0.02; // Thickness of the bars
+        const gridHeight = (rows * gapY) + barWidth; // approximate
+
         if (!config.hideBoard) {
             // --- Construct Double-Sided Grid Frame ---
             // Instead of a solid backing, we build a rack from bars so pieces are visible from both sides.
-            const rows = 6;
-            const cols = 7;
-            const startX = -0.3;
-            const startY = 0.1;
-            const gapX = 0.1;
-            const gapY = 0.1;
 
             // Rack Color can be same Blue
             // Frame Dimensions
@@ -286,7 +290,6 @@
             // Frame Depth = 0.03.
 
             const frameDepth = 0.03;
-            const barWidth = 0.02; // Thickness of the bars
 
             // 1. Vertical Bars (8 total: Left of col 0, Right of col 0/Left of col 1... Right of col 6)
             // Columns are at startX + c*gapX.
@@ -297,8 +300,6 @@
             const frameRoot = await new BS.GameObject("Frame_Root").Async();
             await frameRoot.SetParent(state.root, false);
             await frameRoot.AddComponent(new BS.Transform());
-
-            const gridHeight = (rows * gapY) + barWidth; // approximate
 
             for (let i = 0; i <= cols; i++) {
                 const barX = (startX - (gapX / 2)) + (i * gapX);
