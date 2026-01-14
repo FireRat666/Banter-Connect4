@@ -344,9 +344,9 @@
                 const y = startY + (r * gapY);
                 const pos = new BS.Vector3(x, y, piecesZ);
 
-                // 1. Create the original sphere piece
+                // 1. Create the original sphere piece - needs unique material for color changes
                 const spherePiece = await createBanterObject(state.piecesRoot, BS.GeometryType.SphereGeometry,
-                    { radius: 0.045 }, COLORS.empty, pos);
+                    { radius: 0.045 }, COLORS.empty, pos, false, 1.0, `sphere_${r}_${c}`);
                 const pt = spherePiece.GetComponent(BS.ComponentType.Transform);
                 pt.localScale = new BS.Vector3(1, 1, 0.25);
                 spherePiece.SetActive(false);
@@ -459,7 +459,7 @@
         }
     }
 
-    async function createBanterObject(parent, type, dims, colorHex, pos, hasCollider = false, opacity = 1.0) {
+    async function createBanterObject(parent, type, dims, colorHex, pos, hasCollider = false, opacity = 1.0, cacheBust = null) {
         const obj = await new BS.GameObject("Geo").Async();
         await obj.SetParent(parent, false);
 
@@ -480,7 +480,8 @@
             shader = "Unlit/DiffuseTransparent";
         }
         
-        await obj.AddComponent(new BS.BanterMaterial(shader, "", color, BS.MaterialSide.Front, false));
+        // Use cacheBust to create unique material instance for objects that need dynamic colors
+        await obj.AddComponent(new BS.BanterMaterial(shader, "", color, BS.MaterialSide.Front, false, cacheBust || ""));
 
         // Add Collider
         if (hasCollider) {
