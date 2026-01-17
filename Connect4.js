@@ -344,34 +344,16 @@
                 const y = startY + (r * gapY);
                 const pos = new BS.Vector3(x, y, piecesZ);
 
-                // 1. Create the original sphere piece - needs unique material for color changes
-                const spherePiece = await createBanterObject(state.piecesRoot, BS.GeometryType.SphereGeometry,
-                    { radius: 0.045 }, COLORS.empty, pos, false, 1.0, `sphere_${r}_${c}`);
-                const pt = spherePiece.GetComponent(BS.ComponentType.Transform);
-                pt.localScale = new BS.Vector3(1, 1, 0.25);
-                spherePiece.SetActive(false);
-                
-                // 2. Create the custom model pieces (if enabled)
-                let redPiece = null;
-                let yellowPiece = null;
-                let greenPiece = null;
-                if (config.useCustomModels) {
-                    redPiece = await createCustomPiece(state.piecesRoot, 1, pos);
-                    if(redPiece) redPiece.SetActive(false);
-
-                    yellowPiece = await createCustomPiece(state.piecesRoot, 2, pos);
-                    if(yellowPiece) yellowPiece.SetActive(false);
-
-                    greenPiece = await createCustomPiece(state.piecesRoot, 'highlight', pos);
-                    if(greenPiece) greenPiece.SetActive(false);
-                }
-
-                // Store all piece versions for this slot
+                // Lazy Instantiation: Initialize empty slots only. 
+                // Pieces will be created in updateVisuals when needed.
                 state.slots[r][c] = {
-                    sphere: spherePiece,
-                    redModel: redPiece,
-                    yellowModel: yellowPiece,
-                    greenModel: greenPiece
+                    sphere: null,
+                    redModel: null,
+                    yellowModel: null,
+                    greenModel: null,
+                    pos: pos,
+                    r: r,
+                    c: c
                 };
             }
         }
@@ -562,15 +544,20 @@
         // Lock-Step: We do NOT update visuals here. We wait for server echo.
     }
 
-    function updateVisuals() {
+    async function updateVisuals() {
+        if (!state.piecesRoot) return;
+
         for (let r = 0; r < 6; r++) {
             for (let c = 0; c < 7; c++) {
                 const cell = state.game.board[r][c];
                 const slot = state.slots[r][c];
                 const isWinCell = state.game.winningCells.some(([wr, wc]) => wr === r && wc === c);
+                
+                // Ensure slot exists (it should)
+                if(!slot) continue;
 
-                // Deactivate all pieces first
-                slot.sphere.SetActive(false);
+                // Deactivate all existing pieces first
+                if (slot.sphere) slot.sphere.SetActive(false);
                 if (slot.redModel) slot.redModel.SetActive(false);
                 if (slot.yellowModel) slot.yellowModel.SetActive(false);
                 if (slot.greenModel) slot.greenModel.SetActive(false);
@@ -579,24 +566,47 @@
                     continue; // Slot is empty
                 }
 
-                if (isWinCell && config.useCustomModels) {
-                    // Priority 1: Show green highlight model if winning
-                    if (slot.greenModel) {
-                        slot.greenModel.SetActive(true);
-                    }
-                } else if (config.useCustomModels) {
-                    // Priority 2: Show player's custom model
-                    if (cell === 1 && slot.redModel) slot.redModel.SetActive(true);
-                    if (cell === 2 && slot.yellowModel) slot.yellowModel.SetActive(true);
+                if (config.useCustomModels) {
+                     if (isWinCell) {
+                        if (!slot.greenModel) {
+                            slot.greenModel = await createCustomPiece(state.piecesRoot, 'highlight', slot.pos);
+                        }
+                        if (slot.greenModel) slot.greenModel.SetActive(true);
+                     } else {
+                        if (cell === 1) {
+                            if (!slot.redModel) {
+                                slot.redModel = await createCustomPiece(state.piecesRoot, 1, slot.pos);
+                            }
+                            if (slot.redModel) slot.redModel.SetActive(true);
+                        }
+                        if (cell === 2) {
+                            if (!slot.yellowModel) {
+                                slot.yellowModel = await createCustomPiece(state.piecesRoot, 2, slot.pos);
+                            }
+                            if (slot.yellowModel) slot.yellowModel.SetActive(true);
+                        }
+                     }
                 } else {
                     // Fallback: Show sphere and color it
-                    slot.sphere.SetActive(true);
-                    let pieceColor = (cell === 1) ? COLORS.red : COLORS.yellow;
-                    if (isWinCell) {
-                        pieceColor = COLORS.winHighlight;
+                    if (!slot.sphere) {
+                        // Create sphere on demand
+                        const spherePiece = await createBanterObject(state.piecesRoot, BS.GeometryType.SphereGeometry,
+                            { radius: 0.045 }, COLORS.empty, slot.pos, false, 1.0, `sphere_${slot.r}_${slot.c}`);
+                        const pt = spherePiece.GetComponent(BS.ComponentType.Transform);
+                        pt.localScale = new BS.Vector3(1, 1, 0.25);
+                        await spherePiece.SetLayer(5);
+                        slot.sphere = spherePiece;
                     }
-                    const mat = slot.sphere.GetComponent(BS.ComponentType.BanterMaterial);
-                    if (mat) mat.color = hexToVector4(pieceColor);
+
+                    if (slot.sphere) {
+                        slot.sphere.SetActive(true);
+                        let pieceColor = (cell === 1) ? COLORS.red : COLORS.yellow;
+                        if (isWinCell) {
+                            pieceColor = COLORS.winHighlight;
+                        }
+                        const mat = slot.sphere.GetComponent(BS.ComponentType.BanterMaterial);
+                        if (mat) mat.color = hexToVector4(pieceColor);
+                    }
                 }
             }
         }
