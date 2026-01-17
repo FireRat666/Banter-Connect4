@@ -501,7 +501,7 @@
         t.localEulerAngles = new BS.Vector3(90, 0, 0);
 
         const url = getModelUrl(modelName);
-        console.log(`Loading GLB from: ${url}`);
+        // console.log(`Loading GLB from: ${url}`);
         
         try {
             await piece.AddComponent(new BS.BanterGLTF(url, false, false, false, false, false, false));
