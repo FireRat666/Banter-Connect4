@@ -268,15 +268,6 @@
         return new BS.Vector4(((num >> 16) & 255) / 255, ((num >> 8) & 255) / 255, (num & 255) / 255, 1);
     }
 
-    async function init() {
-        if (!window.BS) {
-            console.error("Banter SDK not found!");
-            return;
-        }
-
-        BS.BanterScene.GetInstance().On("unity-loaded", setupScene);
-    }
-
     async function setupScene() {
         console.log("Connect4: Setup Scene Started");
         state.root = await new BS.GameObject("Connect4_Root").Async();
@@ -659,5 +650,19 @@
         });
     }
 
-    init();
+    async function checkForBS() {
+    if (window.BS) {
+        // BS is loaded, so we can now execute the script
+        console.log(`Connect4 Script BS is loaded, so we can now execute the script`);
+        setupScene();
+    } else {
+            // BS not loaded yet, wait for it
+            console.log(`Connect4 Script BS not loaded yet, wait for it`);
+            window.addEventListener("unity-loaded", setupScene);
+        }
+        console.log(`Connect4 Script Checked for BS`);
+    }
+
+    checkForBS();
+
 })();
