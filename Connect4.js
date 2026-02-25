@@ -1,4 +1,5 @@
 (function () {
+BS.BanterScene.GetInstance().On("unity-loaded", async () => {
     /**
      * Banter Connect 4 Embed Script
      * A fully synced multiplayer Connect 4 game for Banter.
@@ -650,19 +651,7 @@
         });
     }
 
-    async function checkForBS() {
-    if (window.BS) {
-        // BS is loaded, so we can now execute the script
-        console.log(`Connect4 Script BS is loaded, so we can now execute the script`);
-        setupScene();
-    } else {
-            // BS not loaded yet, wait for it
-            console.log(`Connect4 Script BS not loaded yet, wait for it`);
-            window.addEventListener("unity-loaded", setupScene);
-        }
-        console.log(`Connect4 Script Checked for BS`);
-    }
+    setupScene();
 
-    checkForBS();
-
+})
 })();
