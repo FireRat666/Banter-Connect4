@@ -1,5 +1,5 @@
 (function () {
-BS.BanterScene.GetInstance().On("unity-loaded", async () => {
+window.addEventListener("unity-loaded", async () => {
     /**
      * Banter Connect 4 Embed Script
      * A fully synced multiplayer Connect 4 game for Banter.
