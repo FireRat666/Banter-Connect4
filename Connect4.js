@@ -7,12 +7,12 @@ window.addEventListener("unity-loaded", async () => {
 
     // --- Configuration ---
     const config = {
-        boardPosition: new BS.Vector3(0, 1.1, 0),
-        boardRotation: new BS.Vector3(0, 0, 0),
-        boardScale: new BS.Vector3(1, 1, 1),
-        resetPosition: new BS.Vector3(0, -0.4, 0), // Default below board
-        resetRotation: new BS.Vector3(0, 0, 0),
-        resetScale: new BS.Vector3(1, 1, 1),
+        boardPosition: [0, 1.1, 0],
+        boardRotation: [0, 0, 0],
+        boardScale: [1, 1, 1],
+        resetPosition: [0, -0.4, 0], // Default below board
+        resetRotation: [0, 0, 0],
+        resetScale: [1, 1, 1],
         instance: window.location.href.split('?')[0],
         hideUI: false,
         hideBoard: false,
@@ -30,17 +30,17 @@ window.addEventListener("unity-loaded", async () => {
         hover: '#4488FF'     // Column hover effect
     };
 
-    // Helper to parse Vector3
+    // Helper to parse Vector3 - now returns array [x,y,z]
     const parseVector3 = (str, defaultVal) => {
         if (!str) return defaultVal;
         const s = str.trim();
         if (s.includes(' ')) {
             const parts = s.split(' ').map(Number);
-            if (parts.length >= 3) return new BS.Vector3(parts[0], parts[1], parts[2]);
+            if (parts.length >= 3) return [parts[0], parts[1], parts[2]];
         }
         const num = parseFloat(s);
         if (!isNaN(num)) {
-            return new BS.Vector3(num, num, num);
+            return [num, num, num];
         }
         return defaultVal;
     };
@@ -58,6 +58,7 @@ window.addEventListener("unity-loaded", async () => {
         if (params.has('lighting')) config.lighting = params.get('lighting');
         if (params.has('addLights')) config.addLights = params.get('addLights') !== 'false';
 
+        // Store as arrays for now, will convert to BS.Vector3 in setupScene
         config.boardScale = parseVector3(params.get('boardScale'), config.boardScale);
         config.boardPosition = parseVector3(params.get('boardPosition'), config.boardPosition);
         config.boardRotation = parseVector3(params.get('boardRotation'), config.boardRotation);
@@ -271,6 +272,31 @@ window.addEventListener("unity-loaded", async () => {
 
     async function setupScene() {
         console.log("Connect4: Setup Scene Started");
+
+        // Convert config array values to BS.Vector3 now that BS is available
+        config.boardPosition = new BS.Vector3(...config.boardPosition);
+        config.boardRotation = new BS.Vector3(...config.boardRotation);
+        config.boardScale = new BS.Vector3(...config.boardScale);
+        config.resetPosition = new BS.Vector3(...config.resetPosition);
+        config.resetRotation = new BS.Vector3(...config.resetRotation);
+        config.resetScale = new BS.Vector3(...config.resetScale);
+
+        // Re-parse URL params to ensure BS.Vector3 conversion for any overridden values
+        // This is necessary because parseVector3 now returns arrays, and we need BS.Vector3 objects
+        const currentScript = document.currentScript;
+        if (currentScript) {
+            const url = new URL(currentScript.src);
+            const params = new URLSearchParams(url.search);
+
+            if (params.has('boardScale')) config.boardScale = new BS.Vector3(...parseVector3(params.get('boardScale'), [1,1,1]));
+            if (params.has('boardPosition')) config.boardPosition = new BS.Vector3(...parseVector3(params.get('boardPosition'), [0,1.1,0]));
+            if (params.has('boardRotation')) config.boardRotation = new BS.Vector3(...parseVector3(params.get('boardRotation'), [0,0,0]));
+
+            if (params.has('resetScale')) config.resetScale = new BS.Vector3(...parseVector3(params.get('resetScale'), [1,1,1]));
+            if (params.has('resetPosition')) config.resetPosition = new BS.Vector3(...parseVector3(params.get('resetPosition'), [0,-0.4,0]));
+            if (params.has('resetRotation')) config.resetRotation = new BS.Vector3(...parseVector3(params.get('resetRotation'), [0,0,0]));
+        }
+
         state.root = await new BS.GameObject("Connect4_Root").Async();
         let t = await state.root.AddComponent(new BS.Transform());
         t.position = config.boardPosition;
