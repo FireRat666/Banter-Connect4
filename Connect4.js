@@ -1,5 +1,5 @@
-(function () {
 window.addEventListener("unity-loaded", async () => {
+(function () {
     /**
      * Banter Connect 4 Embed Script
      * A fully synced multiplayer Connect 4 game for Banter.
@@ -653,5 +653,5 @@ window.addEventListener("unity-loaded", async () => {
 
     setupScene();
 
-})
 })();
+});
