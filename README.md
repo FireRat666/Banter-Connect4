@@ -13,35 +13,41 @@ A fully synced, multiplayer Connect 4 game that can be effortlessly embedded int
 
 Add the following script tag to your space's `index.html` (or wherever you inject Banter scripts):
 
+**HTML Script Attributes (Recommended):**
 ```html
-<script src="https://banter-connect4.firer.at/Connect4.js?instance=game1&boardPosition=0 1.5 5"></script>
+<script src="https://banter-connect4.firer.at/Connect4.js" instance="game1" boardPosition="0 1.5 5"></script>
+```
+
+**Legacy URL Query Parameters:**
+```html
+<script src="https://banter-connect4.firer.at/Connect4.js?instance=game1&boardPosition=0+1.5+5"></script>
 ```
 
 *Replace the `src` URL with the actual path to where you are hosting `Connect4.js`.*
 
 ## Configuration Parameters
 
-You can configure the game instance using query parameters in the script `src`:
+You can configure the game instance using **HTML script attributes** (recommended) or legacy **URL query parameters** (for backwards compatibility):
 
-| Parameter | Description | Default | Example |
+| Parameter / Attribute | Description | Default | Example (Attribute) |
 | :--- | :--- | :--- | :--- |
-| `instance` | **Required** for multiple games. A unique identifier for this game instance to sync correctly. | `[url_path]` | `?instance=lobby_game` |
-| `boardPosition` | The position of the board in the space (x y z). | `0 1.1 0` | `?boardPosition=5 0 10` |
-| `boardRotation` | The rotation of the board in Euler degrees (x y z). | `0 0 0` | `?boardRotation=0 180 0` |
-| `boardScale` | The scale of the board (x y z). | `1 1 1` | `?boardScale=2 2 2` |
-| `resetPosition` | Position of the reset button relative to the board. | `0 -0.4 0` | `?resetPosition=0 -0.5 0` |
-| `resetRotation` | Rotation of the reset button relative to the board. | `0 0 0` | `?resetRotation=180 0 0` |
-| `resetScale` | Scale of the reset button. | `1 1 1` | `?resetScale=0.5 0.5 0.5` |
-| `hideUI` | If `true`, hides the restart/reset button. | `false` | `?hideUI=true` |
-| `HideBoard` | If `true`, hides the game board frame. | `false` | `?HideBoard=true` |
-| `useCustomModels` | If `true`, uses custom GLB models for the pieces instead of the default spheres. Requires `Models/DiscRed.glb` and `Models/DiscBlue.glb` to be present. | `false` | `?useCustomModels=true` |
-| `lighting` | If `lit` and using custom models, applies a `Standard` material to the pieces so they react to scene lights. | `unlit` | `?lighting=lit` |
-| `addLights` | If `true` and using lit custom models, adds a default directional light to the scene. | `true` | `?addLights=false` |
+| `instance` | **Required** for multiple games. A unique identifier for this game instance to sync correctly. | `[url_path]` | `instance="lobby_game"` |
+| `boardPosition` / `position` / `board-position` | The position of the board in the space (x y z). | `0 1.1 0` | `boardPosition="5 0 10"` |
+| `boardRotation` / `rotation` / `board-rotation` | The rotation of the board in Euler degrees (x y z). | `0 0 0` | `boardRotation="0 180 0"` |
+| `boardScale` / `scale` / `board-scale` | The scale of the board (x y z). | `1 1 1` | `boardScale="2 2 2"` |
+| `resetPosition` / `reset-position` | Position of the reset button relative to the board. | `0 -0.4 0` | `resetPosition="0 -0.5 0"` |
+| `resetRotation` / `reset-rotation` | Rotation of the reset button relative to the board. | `0 0 0` | `resetRotation="180 0 0"` |
+| `resetScale` / `reset-scale` | Scale of the reset button. | `1 1 1` | `resetScale="0.5 0.5 0.5"` |
+| `hideUI` / `hide-ui` | If `true`, hides the restart/reset button. | `false` | `hideUI="true"` |
+| `hideBoard` / `hide-board` | If `true`, hides the game board frame. | `false` | `hideBoard="true"` |
+| `useCustomModels` / `use-custom-models` | If `true`, uses custom GLB models for the pieces instead of the default spheres. Requires `Models/DiscRed.glb` and `Models/DiscBlue.glb` to be present. | `false` | `useCustomModels="true"` |
+| `lighting` | If `lit` and using custom models, applies a `Standard` material to the pieces so they react to scene lights. | `unlit` | `lighting="lit"` |
+| `addLights` / `add-lights` | If `true` and using lit custom models, adds a default directional light to the scene. | `true` | `addLights="false"` |
 
-### Example with all parameters
+### Example with all parameters (using Attributes)
 
 ```html
-<script src="https://banter-connect4.firer.at/Connect4.js?instance=lounge_c4&boardPosition=10 0.5 -3&boardRotation=0 90 0&boardScale=1.5 1.5 1.5&useCustomModels=true&lighting=lit"></script>
+<script src="https://banter-connect4.firer.at/Connect4.js" instance="lounge_c4" boardPosition="10 0.5 -3" boardRotation="0 90 0" boardScale="1.5 1.5 1.5" useCustomModels="true" lighting="lit"></script>
 ```
 
 ## Game Rules
